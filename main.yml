@@ -1,0 +1,7 @@
+- name: Install Magento 2
+  hosts: all
+  become: yes
+
+  roles:
+    - common
+    - setup_magento

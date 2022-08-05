@@ -1,0 +1,90 @@
+- name: Clone repo from git
+  git:
+    repo: https://github.com/bijay135/docker-magento2
+    dest: /home/{{ USER }}/docker-magento
+    clone: yes
+    update: yes
+    
+- name: Run initialize script
+  shell: bash /home/{{ USER }}/docker-magento/local-initialize.sh
+  args:
+    chdir: /home/{{ USER }}/docker-magento
+  become: yes
+
+- name: Set Magento access keys
+  file:
+    path: "/home/{{ USER }}/.composer/auth.json"
+    state: touch
+    mode: 0600
+    owner: www-data
+    group: www-data
+  become: yes
+
+- name: Adding content to file
+  copy:
+    dest: "/home/{{ USER }}/.composer/auth.json"
+    content: |
+      {
+        "http-basic": {
+          "repo.magento.com": {
+            "username": "{{ PUBLIC_KEY }}",
+            "password": "{{ PRIVATE_KEY }}"
+            }
+          }
+        }
+  become: yes
+
+- name: Deploy Docker Compose stack
+  community.docker.docker_compose:
+    project_src: /home/{{ USER }}/docker-magento
+    files:
+    - docker-compose.yml
+    - docker-compose.local.yml
+  become: yes
+
+  # - name: Set Magento Access Keys for Composer
+  #   command: docker exec -it cli composer global config http-basic.repo.magento.com "{{ PUBLIC_KEY }}" "{{ PRIVATE_KEY }}"
+
+- name: Download magento files
+  shell: $cli_composer create-project --repository=https://repo.magento.com/ magento/project-community-edition .
+  args:
+    chdir: /home/support/html
+
+- name: Install Magento
+  shell: |
+    docker exec -it -u www-data -w /var/www/html/magento cli bin/magento setup:install \ 
+    --base-url=http://{{ IP }}/ --db-host=mysql:3306 --db-name=magento --db-user={{ USER }} \
+    --db-password=5hKh5EVswD --admin-firstname=admin --admin-lastname=admin --admin-email=admin@admin.com \
+    --admin-user=admin --admin-password=admin123 --language=en_US --currency=USD --timezone=America/Chicago \
+    --use-rewrites=1 --search-engine=elasticsearch7 --elasticsearch-host=elasticsearch \
+    --elasticsearch-port=9200 --elasticsearch-index-prefix=magento --elasticsearch-timeout=15
+  register: output
+  ignore_errors: True
+
+- name: copy the output to a local file
+  copy:
+    content: "{{ output.stdout }}"
+    dest: "/tmp/hello.txt"
+
+- name: Copy remote file with admin URL
+  fetch:
+    src: /tmp/hello.txt
+    dest: /home/support/adminURL.txt
+    flat: yes
+
+- name: Setup magento
+  expect:
+    command: "docker exec -it -u www-data -w /var/www/html/magento cli bin/magento sampledata:deploy"
+    responses:
+      (.*)Username:(.*): "{{ PUBLIC_KEY }}"
+      (.*)Password:(.*): "{{ PRIVATE_KEY }}"
+      (.*)Do you want to store credentials(.*): "Y"
+
+- name: Setup magento
+  shell: "docker exec -it -u www-data -w /var/www/html/magento cli bin/magento setup:upgrade"
+
+- name: Setup magento
+  shell: "docker exec -it -u www-data -w /var/www/html/magento cli bin/magento indexer:reindex"
+
+- name: Setup magento
+  shell: "docker exec -it -u www-data -w /var/www/html/magento cli bin/magento cache:flush"
