@@ -48,7 +48,7 @@
 - name: Download magento files
   shell: $cli_composer create-project --repository=https://repo.magento.com/ magento/project-community-edition .
   args:
-    chdir: /home/support/html
+    chdir: /home/{{ USER }}/html
 
 - name: Install Magento
   shell: |
