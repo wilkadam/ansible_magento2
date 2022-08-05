@@ -27,8 +27,8 @@
       {
         "http-basic": {
           "repo.magento.com": {
-            "username": "{{ PUBLIC_KEY }}",
-            "password": "{{ PRIVATE_KEY }}"
+            "username": "{{ MAGENTO_PUBLIC_KEY }}",
+            "password": "{{ MAGENTO_PRIVATE_KEY }}"
             }
           }
         }
@@ -43,7 +43,7 @@
   become: yes
 
   # - name: Set Magento Access Keys for Composer
-  #   command: docker exec -it cli composer global config http-basic.repo.magento.com "{{ PUBLIC_KEY }}" "{{ PRIVATE_KEY }}"
+  #   command: docker exec -it cli composer global config http-basic.repo.magento.com "{{ MAGENTO_PUBLIC_KEY }}" "{{ MAGENTO_PRIVATE_KEY }}"
 
 - name: Download magento files
   shell: $cli_composer create-project --repository=https://repo.magento.com/ magento/project-community-edition .
@@ -76,8 +76,8 @@
   expect:
     command: "docker exec -it -u www-data -w /var/www/html/magento cli bin/magento sampledata:deploy"
     responses:
-      (.*)Username:(.*): "{{ PUBLIC_KEY }}"
-      (.*)Password:(.*): "{{ PRIVATE_KEY }}"
+      (.*)Username:(.*): "{{ MAGENTO_PUBLIC_KEY }}"
+      (.*)Password:(.*): "{{ MAGENTO_PRIVATE_KEY }}"
       (.*)Do you want to store credentials(.*): "Y"
 
 - name: Setup magento
