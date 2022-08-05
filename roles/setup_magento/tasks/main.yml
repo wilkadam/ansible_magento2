@@ -69,7 +69,7 @@
 - name: Copy remote file with admin URL
   fetch:
     src: /tmp/hello.txt
-    dest: /home/support/adminURL.txt
+    dest: /tmp/adminURL.txt
     flat: yes
 
 - name: Setup magento
