@@ -9,3 +9,8 @@ To execute playbook you need to run:
 ansible-playbook -i inventory main.yml
 ```
 from your ansible controller. Execution of playbook can take around 25 minutes, depending of you Internet connection and machine capabilities.
+Remember to add your public key to remote machine with:
+```
+ssh-copy-id <user>@IP
+```
+and add contents of your private key to id_rsa file.
