@@ -14,3 +14,8 @@ Remember to add your public key to remote machine with:
 ssh-copy-id <user>@IP
 ```
 and add contents of your private key to id_rsa file.
+
+URI for admin site will be copied to /tmp/adminURL.txt on your ansible controller. You can get Magento Admin URI with:
+```
+tail -n 2 /tmp/adminURL.txt
+```

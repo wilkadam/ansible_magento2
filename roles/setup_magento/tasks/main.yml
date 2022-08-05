@@ -68,7 +68,7 @@
 
 - name: Copy remote file with admin URL
   fetch:
-    src: /tmp/hello.txt
+    src: /tmp/adminURL.txt
     dest: /tmp/adminURL.txt
     flat: yes
 
