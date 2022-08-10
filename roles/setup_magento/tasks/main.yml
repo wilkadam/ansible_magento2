@@ -64,7 +64,7 @@
 - name: copy the output to a local file
   copy:
     content: "{{ output.stdout }}"
-    dest: "/tmp/hello.txt"
+    dest: "/tmp/adminURL.txt"
 
 - name: Copy remote file with admin URL
   fetch:
